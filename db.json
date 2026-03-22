@@ -385,6 +385,14 @@
       "result": "\n                    ---\n                ",
       "timestamp": "2026-03-22T13:12:08.342Z",
       "id": "LAxUGwE9t_8"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "121mm to km",
+      "result": "0.000121 km",
+      "timestamp": "2026-03-22T13:16:51.333Z",
+      "id": "RFsDfnhc_VE"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

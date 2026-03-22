@@ -1,7 +1,7 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
-import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
+import { populateDropdown, renderHistory, toggleOperators } from "./ui.js";
 import { convert, compareValues, applyConversion, performArithmetic } from "./conversion.js";
-// The webpage reloads and clears history after a measurement has been calculated. 
+
 const state = {
     type: "length",
     action: "Conversion",
@@ -9,7 +9,7 @@ const state = {
     toVal: 0,
     fromUnit: "",
     toUnit: "",
-    operator: "+", 
+    operator: "+",
     unitsData: [],
     formulas: []
 };
@@ -17,86 +17,96 @@ const state = {
 let debounceTimer;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Initial Highlight Setup
-    const defaultTypeBtn = document.querySelector(`.unit-box[data-type="${state.type}"]`);
-    const defaultActionBtn = Array.from(document.querySelectorAll(".mode-btn"))
-                                   .find(btn => btn.textContent.trim() === state.action);
+    // Initial UI state setup
+    const initialType = document.querySelector(`.unit-box[data-type="${state.type}"]`);
+    if (initialType) initialType.classList.add("active");
 
-    if (defaultTypeBtn) defaultTypeBtn.classList.add("active");
-    if (defaultActionBtn) defaultActionBtn.classList.add("active");
+    // Action button highlight (Conversion by default)
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        if (btn.textContent.trim() === state.action) btn.classList.add("active");
+    });
 
-    // 2. Load Data
     await loadUnits(state.type);
     await loadHistory();
     attachEventListeners();
-    updateInputStates();
 });
+
+/**
+ * UC-JS-01: Handle Type Card Click
+ */
+async function handleTypeClick(card) {
+    state.type = card.dataset.type;
+    
+    // Set Active Visuals
+    document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
+    card.classList.add("active");
+
+    // Reset UI
+    document.getElementById("input-from").value = "";
+    document.getElementById("input-to").value = "";
+    document.getElementById("result-text").textContent = "---";
+
+    // Refresh Data
+    await loadUnits(state.type);
+}
+
+/**
+ * UC-JS-02: Handle Action Tab Click
+ */
+function handleActionClick(btn) {
+    // 1. Update State
+    state.action = btn.textContent.trim();
+
+    // 2. Set Active Visuals
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    // 3. Toggle Operator Visibility
+    toggleOperators(state.action === "Arithmetic");
+
+    // 4. Clear Result (showResult(0, ""))
+    document.getElementById("result-text").textContent = "---";
+    
+    // Toggle Read-Only for Input 2
+    const toInput = document.getElementById("input-to");
+    toInput.readOnly = (state.action === "Conversion");
+    
+    // If switching to Conversion, clear value in box 2
+    if (state.action === "Conversion") toInput.value = "";
+}
 
 async function loadUnits(type) {
     const units = await getUnits(type.toLowerCase());
+    state.unitsData = units;
+    
+    const fromSelect = document.getElementById("select-from");
+    const toSelect = document.getElementById("select-to");
+    
+    populateDropdown(fromSelect, units);
+    populateDropdown(toSelect, units);
+
     if (type.toLowerCase() === "temperature") {
-        state.formulas = await getConversions(); 
-    }
-    if (units && units.length > 0) {
-        state.unitsData = units;
-        state.fromUnit = units[0].symbol;
-        state.toUnit = units[0].symbol;
-        populateDropdowns(units);
-        performCalculation();
+        state.formulas = await getConversions();
     }
 }
 
 async function loadHistory() {
-    const historyData = await getHistory();
-    renderHistory(historyData);
-}
-
-function updateInputStates() {
-    const toInput = document.getElementById("input-to");
-    toInput.readOnly = (state.action === "Conversion");
-    if (state.action !== "Conversion") {
-        toInput.value = state.toVal || "";
-    }
-}
-
-function performCalculation() {
-    const outputField = document.getElementById("input-to");
-    const resultDisplay = document.getElementById("result-text");
-    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
-    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
-
-    if (!unitFrom || !unitTo) return;
-
-    try {
-        if (state.action === "Arithmetic") {
-            const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
-            const result = performArithmetic(state.fromVal, v2normalised, state.operator);
-            resultDisplay.textContent = `${result} ${state.fromUnit}`;
-        } else if (state.action === "Comparison") {
-            const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
-            const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
-            resultDisplay.textContent = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
-        } else {
-            const result = convert(state.fromVal, unitFrom, unitTo, state.formulas);
-            outputField.value = result;
-            resultDisplay.textContent = `${result} ${state.toUnit}`;
-        }
-    } catch (err) {
-        resultDisplay.textContent = err.message;
-    }
+    const data = await getHistory();
+    renderHistory(data);
 }
 
 async function handleHistorySaving() {
-    if (state.fromVal === 0 && state.toVal === 0) return;
+    // Don't save if both inputs are zero or empty
+    if (!state.fromVal && !state.toVal) return;
 
-    const resultDisplay = document.getElementById("result-text");
+    const resultStr = document.getElementById("result-text").textContent;
     const record = {
         type: state.type,
         action: state.action,
         expression: state.action === "Conversion" 
             ? `${state.fromVal}${state.fromUnit} to ${state.toUnit}`
-            : `${state.fromVal}${state.fromUnit} ${state.operator || 'vs'} ${state.toVal}${state.toUnit}`,
-        result: resultDisplay.textContent,
+            : `${state.fromVal}${state.fromUnit} ${state.operator} ${state.toVal}${state.toUnit}`,
+        result: resultStr,
         timestamp: new Date().toISOString()
     };
 
@@ -107,60 +117,44 @@ async function handleHistorySaving() {
 function attachEventListeners() {
     const triggerSave = () => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => handleHistorySaving(), 5000); // 5s Delay
+        debounceTimer = setTimeout(() => handleHistorySaving(), 5000);
     };
 
-    // UNIT BOX HIGHLIGHTING
+    // UC-JS-01: Type Selection
     document.querySelectorAll(".unit-box").forEach(card => {
-        card.addEventListener("click", async () => {
-            document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
-            card.classList.add("active");
-            state.type = card.getAttribute("data-type");
-            await loadUnits(state.type);
-        });
+        card.addEventListener("click", () => handleTypeClick(card));
     });
 
-    // MODE BUTTON HIGHLIGHTING
+    // UC-JS-02: Action Selection
     document.querySelectorAll(".mode-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            state.action = btn.textContent.trim();
-            updateInputStates();
-            toggleOperators(state.action === "Arithmetic");
-            performCalculation();
-        });
+        btn.addEventListener("click", () => handleActionClick(btn));
     });
 
+    // Inputs & Selects (Triggering the 5s save)
     document.getElementById("input-from").addEventListener("input", (e) => {
         state.fromVal = Number(e.target.value) || 0;
-        performCalculation();
         triggerSave();
     });
 
     document.getElementById("input-to").addEventListener("input", (e) => {
         if (state.action !== "Conversion") {
             state.toVal = Number(e.target.value) || 0;
-            performCalculation();
             triggerSave();
         }
     });
 
-    document.getElementById("select-operator").addEventListener("change", (e) => {
-        state.operator = e.target.value;
-        performCalculation();
-        triggerSave();
-    });
-
     document.getElementById("select-from").addEventListener("change", (e) => {
         state.fromUnit = e.target.value;
-        performCalculation();
         triggerSave();
     });
 
     document.getElementById("select-to").addEventListener("change", (e) => {
         state.toUnit = e.target.value;
-        performCalculation();
+        triggerSave();
+    });
+
+    document.getElementById("select-operator").addEventListener("change", (e) => {
+        state.operator = e.target.value;
         triggerSave();
     });
 }

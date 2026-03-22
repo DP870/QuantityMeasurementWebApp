@@ -155,240 +155,44 @@
       "from": "°F",
       "to": "°C",
       "formula": "(x - 32) * 5/9"
+    },
+    {
+      "id": "3",
+      "type": "temperature",
+      "from": "°C",
+      "to": "K",
+      "formula": "x + 273.15"
+    },
+    {
+      "id": "4",
+      "type": "temperature",
+      "from": "K",
+      "to": "°C",
+      "formula": "x - 273.15"
+    },
+    {
+      "id": "5",
+      "type": "temperature",
+      "from": "°F",
+      "to": "K",
+      "formula": "(x - 32) * 5/9 + 273.15"
+    },
+    {
+      "id": "6",
+      "type": "temperature",
+      "from": "K",
+      "to": "°F",
+      "formula": "(x - 273.15) * 9/5 + 32"
     }
   ],
   "history": [
     {
-      "type": "length",
+      "type": "volume",
       "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T06:59:40.877Z",
-      "id": "JiKwq0fQozg"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T06:59:42.721Z",
-      "id": "gQqyOqmEHU8"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "20 km to km",
-      "result": 20,
-      "timestamp": "2026-03-22T06:59:42.859Z",
-      "id": "5cNZeQQNLjQ"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T06:59:44.296Z",
-      "id": "byovQ2NBcqA"
-    },
-    {
-      "type": "length",
-      "action": "Comparison",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T06:59:51.101Z",
-      "id": "CL1GWiHlCuw"
-    },
-    {
-      "type": "length",
-      "action": "Comparison",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T06:59:54.796Z",
-      "id": "-S6LtmOuZQI"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "9 km to km",
-      "result": 9,
-      "timestamp": "2026-03-22T07:29:58.805Z",
-      "id": "4RGmm6khOy0"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "9 km to km",
-      "result": 9,
-      "timestamp": "2026-03-22T07:30:01.826Z",
-      "id": "CaXQqEYlVRA"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "7 km to km",
-      "result": 7,
-      "timestamp": "2026-03-22T07:30:07.709Z",
-      "id": "jjHWlIboHh4"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "8 km to km",
-      "result": 8,
-      "timestamp": "2026-03-22T07:30:10.332Z",
-      "id": "Hl5R9XgeJaE"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "89 km to km",
-      "result": 89,
-      "timestamp": "2026-03-22T07:30:10.401Z",
-      "id": "KzdaQeACboI"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "8 km to km",
-      "result": 8,
-      "timestamp": "2026-03-22T07:30:31.325Z",
-      "id": "_D2v8P3GL5o"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "8 km to km",
-      "result": 8,
-      "timestamp": "2026-03-22T07:32:28.713Z",
-      "id": "UmMMnJIiXlk"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "9 km to km",
-      "result": 9,
-      "timestamp": "2026-03-22T07:32:30.402Z",
-      "id": "QrlfvQrZU1A"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "7 km to km",
-      "result": 7,
-      "timestamp": "2026-03-22T07:37:30.570Z",
-      "id": "3-dC4NV4dQA"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "4 km to km",
-      "result": 4,
-      "timestamp": "2026-03-22T07:37:32.836Z",
-      "id": "BK1AjQqR7Wc"
-    },
-    {
-      "type": "weight",
-      "action": "Conversion",
-      "expression": "3 t to t",
-      "result": 3,
-      "timestamp": "2026-03-22T07:37:41.226Z",
-      "id": "-pxyHWZyWR8"
-    },
-    {
-      "type": "weight",
-      "action": "Conversion",
-      "expression": "8 mg to mg",
-      "result": 8,
-      "timestamp": "2026-03-22T07:39:23.271Z",
-      "id": "7yFizKJrFLk"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "8 km to km",
-      "result": 8,
-      "timestamp": "2026-03-22T07:39:24.865Z",
-      "id": "LDAeX_dO9Qc"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "7 km to km",
-      "result": 7,
-      "timestamp": "2026-03-22T07:39:26.907Z",
-      "id": "kuMVvoyLh78"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T07:41:41.940Z",
-      "id": "Q6wXmdLX_Lc"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "23 km to km",
-      "result": 23,
-      "timestamp": "2026-03-22T07:41:42.027Z",
-      "id": "ZRsD3Zgb_1c"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T07:41:43.366Z",
-      "id": "21H22ADHNxk"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "23 km to km",
-      "result": 23,
-      "timestamp": "2026-03-22T07:41:43.444Z",
-      "id": "lcofU0IHiVA"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "2 km to km",
-      "result": 2,
-      "timestamp": "2026-03-22T07:41:44.781Z",
-      "id": "kdz9fk1tfYc"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "23 km to km",
-      "result": 23,
-      "timestamp": "2026-03-22T07:41:44.860Z",
-      "id": "F_OJiZQ41gc"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "6 km to km",
-      "result": 6,
-      "timestamp": "2026-03-22T07:42:51.773Z",
-      "id": "vytLnj71RSM"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "1 km to mi",
-      "result": "0.6214",
-      "timestamp": "2026-03-22T07:43:37.908Z",
-      "id": "LxE44SNI1uA"
-    },
-    {
-      "type": "length",
-      "action": "Conversion",
-      "expression": "1212 km to km",
-      "result": "1212",
-      "timestamp": "2026-03-22T07:43:39.942Z",
-      "id": "9TiqKbeRLiI"
+      "expression": "900 ml to L",
+      "result": "0.9",
+      "timestamp": "2026-03-22T08:14:42.086Z",
+      "id": "jCgksXbJTFU"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

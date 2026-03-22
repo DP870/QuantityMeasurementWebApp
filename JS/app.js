@@ -1,6 +1,9 @@
-// ---------------------------
-// Global State Object
-// ---------------------------
+import { getUnits } from "./api.js";
+import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
+
+// ------------------------------------------------------
+// GLOBAL STATE
+// ------------------------------------------------------
 const state = {
     type: "Length",
     action: "Conversion",
@@ -11,27 +14,101 @@ const state = {
     operator: "+"
 };
 
+
+// ------------------------------------------------------
+// APP INITIALISATION (UC‑JS‑02/03/04)
+// ------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("App Loaded.");
 
-    // --- 1. Attach all event listeners ---
     attachEventListeners();
 
-    // --- 2. Load default units (Length) into both dropdowns ---
-    await loadUnits("length");   // our DB uses lowercase "length"
+    await loadUnits("length"); // default category
 
-    // --- 3. Set FIRST Type Card as active ---
+    // Set first type card active
     const typeCards = document.querySelectorAll(".unit-box");
-    if (typeCards.length > 0) typeCards[0].classList.add("active");
+    if (typeCards.length) typeCards[0].classList.add("active");
 
-    // --- 4. Set FIRST Action Button as active ---
+    // Set Conversion button active
     const modeButtons = document.querySelectorAll(".mode-btn");
-    if (modeButtons.length > 0) modeButtons[1].classList.add("active");  
-    // (Comparison = index 0, Conversion = index 1, Arithmetic = index 2)
+    if (modeButtons.length) modeButtons[1].classList.add("active");
 
-    // --- 5. Hide operator row at start (Conversion mode) ---
     toggleOperators(false);
 
-    // --- 6. Load History from backend ---
     await loadHistory();
 });
+
+
+// ------------------------------------------------------
+// LOAD UNITS for a type (UC‑JS‑03)
+// ------------------------------------------------------
+async function loadUnits(type) {
+    const units = await getUnits(type);
+
+    if (!units) {
+        console.error("Could not load units");
+        return;
+    }
+
+    populateDropdowns(units);
+}
+
+
+// ------------------------------------------------------
+// HISTORY LOADER (UC‑JS‑07 later)
+// ------------------------------------------------------
+async function loadHistory() {
+    renderHistory([]); // placeholder
+}
+
+
+// ------------------------------------------------------
+// EVENT LISTENERS
+// ------------------------------------------------------
+function attachEventListeners() {
+
+    // TYPE CARDS
+    const typeCards = document.querySelectorAll(".unit-box");
+    typeCards.forEach(card => {
+        card.addEventListener("click", async () => {
+            const selected = card.querySelector(".box-label").textContent.trim().toLowerCase();
+            state.type = selected;
+
+            typeCards.forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+
+            await loadUnits(selected);
+        });
+    });
+
+    // ACTION BUTTONS (Comparison, Conversion, Arithmetic)
+    const buttons = document.querySelectorAll(".mode-btn");
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const action = btn.textContent.trim();
+            state.action = action;
+
+            buttons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            toggleOperators(action === "Arithmetic");
+        });
+    });
+
+    // INPUT FIELDS
+    const inputs = document.querySelectorAll(".value-input");
+    inputs.forEach((input, index) => {
+        input.addEventListener("input", () => {
+            if (index === 0) state.fromVal = Number(input.value);
+        });
+    });
+
+    // DROPDOWNS
+    const selects = document.querySelectorAll(".unit-select");
+    selects.forEach((select, index) => {
+        select.addEventListener("change", () => {
+            if (index === 0) state.fromUnit = select.value;
+            if (index === 1) state.toUnit = select.value;
+        });
+    });
+}

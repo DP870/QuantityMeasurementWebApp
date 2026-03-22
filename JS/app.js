@@ -1,10 +1,9 @@
-import { getUnits,saveHistory } from "./api.js";
+import { getUnits, saveHistory, getHistory } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
-
-import { convert } from "./conversion.js"; // We will add the conversion logic here
+import { convert } from "./conversion.js";
 
 // ------------------------------------------------------
-// GLOBAL STATE
+// 1. GLOBAL STATE & GLOBALS
 // ------------------------------------------------------
 const state = {
     type: "length",
@@ -12,53 +11,98 @@ const state = {
     fromVal: 0,
     fromUnit: "",
     toUnit: "",
-    unitsData: [] // Store current units for quick math access
+    unitsData: []
 };
 
+let debounceTimer; // Prevents database overload and page lag
+
 // ------------------------------------------------------
-// APP INITIALISATION
+// 2. INITIALIZATION
 // ------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
     console.log("App Initialized.");
 
-    // 1. Set default UI states
+    // Set initial UI active states
     const typeCards = document.querySelectorAll(".unit-box");
     const modeButtons = document.querySelectorAll(".mode-btn");
     
     if (typeCards.length) typeCards[0].classList.add("active");
     if (modeButtons.length) modeButtons[1].classList.add("active");
 
-    // 2. Load initial data
+    // Load initial data
     await loadUnits(state.type);
+    await loadHistory();
     
-    // 3. Start listening for user interaction
     attachEventListeners();
 });
 
 // ------------------------------------------------------
-// LOAD UNITS (Fetches from db.json via api.js)
+// 3. DATA LOADERS
 // ------------------------------------------------------
 async function loadUnits(type) {
     const units = await getUnits(type.toLowerCase());
     if (units && units.length > 0) {
-        state.unitsData = units; // Save to state for math logic
+        state.unitsData = units;
         state.fromUnit = units[0].symbol;
         state.toUnit = units[0].symbol;
         
         populateDropdowns(units);
-        performCalculation(); // Reset calc with new units
+        performCalculation(); // Update UI with default units
     }
 }
 
+async function loadHistory() {
+    const historyData = await getHistory();
+    renderHistory(historyData);
+}
 
 // ------------------------------------------------------
-// EVENT LISTENERS
+// 4. LOGIC ENGINE
+// ------------------------------------------------------
+
+// Updates the "TO" input field instantly (No database work here)
+function performCalculation() {
+    const outputField = document.getElementById("input-to");
+    
+    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
+    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
+
+    if (unitFrom && unitTo) {
+        const result = convert(state.fromVal, unitFrom, unitTo);
+        outputField.value = result;
+    }
+}
+
+// Handles saving to db.json in the background
+async function handleHistorySaving() {
+    // Don't save empty/zero calculations to history
+    if (state.fromVal === 0) return;
+
+    const record = {
+        type: state.type,
+        action: state.action,
+        expression: `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`,
+        result: document.getElementById("input-to").value,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        await saveHistory(record);
+        const updatedHistory = await getHistory();
+        renderHistory(updatedHistory);
+    } catch (error) {
+        console.error("Non-critical history save failed:", error);
+    }
+}
+
+// ------------------------------------------------------
+// 5. EVENT LISTENERS
 // ------------------------------------------------------
 function attachEventListeners() {
-    // 1. TYPE CARDS (Length, Weight, etc.)
+    // A. Type Cards (Length, Weight, etc.)
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
-            const selected = card.querySelector(".box-label").textContent.trim().toLowerCase();
+            const selected = card.getAttribute("data-type") || card.querySelector(".box-label").textContent.trim().toLowerCase();
             state.type = selected;
 
             document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
@@ -68,50 +112,49 @@ function attachEventListeners() {
         });
     });
 
-    // 2. ACTION BUTTONS (Comparison, Conversion, Arithmetic)
+    // B. Mode Buttons
     document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const action = btn.textContent.trim();
-            state.action = action;
-
+            state.action = btn.textContent.trim();
             document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-
-            toggleOperators(action === "Arithmetic");
+            toggleOperators(state.action === "Arithmetic");
         });
     });
 
-    // 3. INPUT FIELD (Left side)
-    const fromInput = document.querySelector(".value-input:not([readonly])");
+    // C. Value Input (Anti-Reset & Anti-Reload Logic)
+    const fromInput = document.getElementById("input-from");
     fromInput.addEventListener("input", (e) => {
-        state.fromVal = Number(e.target.value) || 0;
+        const val = e.target.value;
+
+        if (val === "") {
+            state.fromVal = 0;
+            document.getElementById("input-to").value = 0;
+            return; // Stops the cursor from jumping
+        }
+
+        state.fromVal = Number(val);
+        
+        // 1. Update math UI instantly
         performCalculation();
+
+        // 2. Debounce history saving (waits for typing to stop)
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            handleHistorySaving();
+        }, 500); 
     });
 
-    // 4. DROPDOWNS
-    const selects = document.querySelectorAll(".unit-select");
-    selects[0].addEventListener("change", (e) => {
+    // D. Dropdowns
+    document.getElementById("select-from").addEventListener("change", (e) => {
         state.fromUnit = e.target.value;
         performCalculation();
+        handleHistorySaving(); // Save immediately on dropdown change
     });
-    selects[1].addEventListener("change", (e) => {
+
+    document.getElementById("select-to").addEventListener("change", (e) => {
         state.toUnit = e.target.value;
         performCalculation();
+        handleHistorySaving();
     });
-}
-
-function performCalculation() {
-    // If data hasn't loaded yet, stop the function
-    if (!state.unitsData || state.unitsData.length === 0 || !state.fromUnit) {
-        return; 
-    }
-
-    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
-    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
-
-    // Ensure BOTH units were found before doing math
-    if (unitFrom && unitTo) {
-        const result = convert(state.fromVal, unitFrom, unitTo);
-        document.getElementById("input-to").value = result;
-    }
 }

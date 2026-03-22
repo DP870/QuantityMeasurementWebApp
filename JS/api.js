@@ -40,3 +40,18 @@ export async function saveHistory(record) {
         return null; 
     }
 }
+
+export async function getHistory() {
+    try {
+        // Fetching with sorting parameters for newest-first order
+        const res = await fetch(`${BASE_URL}/history?_sort=timestamp&_order=desc`);
+        
+        if (!res.ok) throw new Error("Could not fetch history");
+        
+        return await res.json();
+    } catch (error) {
+        // Exception Flow: Return empty array and log error
+        console.error("Fetch History Error:", error);
+        return [];
+    }
+}

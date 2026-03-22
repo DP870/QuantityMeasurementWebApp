@@ -21,7 +21,28 @@ export function toggleOperators(show) {
     console.log("Arithmetic mode active:", show);
 }
 
+
+
 export function renderHistory(historyData) {
-    // This can remain a placeholder for now
-    console.log("Rendering history...");
+    const historyContainer = document.getElementById("history-list"); 
+    // Ensure you have a <div id="history-list"> in your HTML
+    
+    if (!historyContainer) return;
+
+    if (historyData.length === 0) {
+        historyContainer.innerHTML = `<p class="empty-msg">No history yet.</p>`;
+        return;
+    }
+
+    const historyHTML = historyData.map(record => `
+        <div class="history-item">
+            <div class="history-details">
+                <span class="history-exp">${record.expression} = ${record.result}</span>
+                <span class="history-type">${record.type} | ${record.action}</span>
+            </div>
+            <span class="history-time">${new Date(record.timestamp).toLocaleTimeString()}</span>
+        </div>
+    `).join("");
+
+    historyContainer.innerHTML = historyHTML;
 }

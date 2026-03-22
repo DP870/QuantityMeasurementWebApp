@@ -1,14 +1,15 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
-import { convert, compareValues, applyConversion } from "./conversion.js";
+import { convert, compareValues, applyConversion, performArithmetic } from "./conversion.js";
 
 const state = {
     type: "length",
-    action: "Comparison", // Default action
+    action: "Conversion",
     fromVal: 0,
-    toVal: 0,      // New: second value for comparison
+    toVal: 0,
     fromUnit: "",
     toUnit: "",
+    operator: "+", 
     unitsData: [],
     formulas: []
 };
@@ -19,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadUnits(state.type);
     await loadHistory();
     attachEventListeners();
-    updateInputStates(); // Initial UI check
+    updateInputStates();
 });
 
 async function loadUnits(type) {
@@ -38,115 +39,138 @@ async function loadUnits(type) {
 
 async function loadHistory() {
     const historyData = await getHistory();
+    console.log("History loaded from DB:", historyData); // Debugging line
     renderHistory(historyData);
 }
 
-// Controls whether the second box is "Read Only" or "Editable"
 function updateInputStates() {
     const toInput = document.getElementById("input-to");
-    if (state.action === "Comparison") {
-        toInput.removeAttribute("readonly");
-        toInput.placeholder = "Enter second value";
-    } else {
+    if (state.action === "Conversion") {
         toInput.setAttribute("readonly", true);
-        toInput.placeholder = "Result";
+    } else {
+        toInput.removeAttribute("readonly");
     }
 }
 
 function performCalculation() {
     const outputField = document.getElementById("input-to");
+    const resultText = document.getElementById("result-text"); // The new div
+    
     const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
     const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
 
     if (!unitFrom || !unitTo) return;
 
-    if (state.action === "Comparison") {
-        // Normalise both to base units for comparison
+    if (state.action === "Arithmetic") {
+        const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
+        const result = performArithmetic(state.fromVal, v2normalised, state.operator);
+        resultText.textContent = `${result} ${state.fromUnit}`;
+    } 
+    else if (state.action === "Comparison") {
         const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
         const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
-        
-        const comparisonResult = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
-        console.log("Comparison result:", comparisonResult); 
-        // Note: In comparison mode, we usually log or show a label. 
-        // If you want to see the text in the box, uncomment next line:
-        // outputField.value = comparisonResult; 
-    } else {
+        resultText.textContent = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
+    } 
+    else {
         const result = convert(state.fromVal, unitFrom, unitTo, state.formulas);
         outputField.value = result;
+        resultText.textContent = `${result} ${state.toUnit}`;
     }
 }
 
 async function handleHistorySaving() {
-    if (state.fromVal === 0 && state.toVal === 0) return;
+    // SECURITY CHECK: Don't save if values are zero
+    if (state.fromVal === 0 && state.toVal === 0) {
+        console.warn("Save cancelled: Values are zero.");
+        return;
+    }
+
+    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
+    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
+    let displayResult = "";
+    let expression = "";
+
+    if (state.action === "Arithmetic") {
+        const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
+        const result = performArithmetic(state.fromVal, v2normalised, state.operator);
+        displayResult = `${result} ${state.fromUnit}`;
+        expression = `${state.fromVal}${state.fromUnit} ${state.operator} ${state.toVal}${state.toUnit}`;
+    } else if (state.action === "Comparison") {
+        const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
+        const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
+        displayResult = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
+        expression = `${state.fromVal}${state.fromUnit} vs ${state.toVal}${state.toUnit}`;
+    } else {
+        displayResult = document.getElementById("input-to").value;
+        expression = `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`;
+    }
 
     const record = {
         type: state.type,
         action: state.action,
-        expression: state.action === "Comparison" 
-            ? `${state.fromVal}${state.fromUnit} vs ${state.toVal}${state.toUnit}`
-            : `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`,
-        result: document.getElementById("input-to").value,
+        expression: expression,
+        result: displayResult,
         timestamp: new Date().toISOString()
     };
 
-    await saveHistory(record);
-    await loadHistory();
+    console.log("Attempting to save record:", record);
+
+    try {
+        await saveHistory(record);
+        await loadHistory(); // Refresh the list
+    } catch (err) {
+        console.error("Failed to save to db.json. Is json-server running?", err);
+    }
 }
 
 function attachEventListeners() {
-    // UNIT TYPE
+    const fromInput = document.getElementById("input-from");
+    const toInput = document.getElementById("input-to");
+
+    const triggerSave = () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            handleHistorySaving();
+        }, 5000); // 5 seconds
+    };
+
+    fromInput.addEventListener("input", (e) => {
+        state.fromVal = Number(e.target.value) || 0;
+        performCalculation();
+        triggerSave();
+    });
+
+    toInput.addEventListener("input", (e) => {
+        if (state.action !== "Conversion") {
+            state.toVal = Number(e.target.value) || 0;
+            triggerSave();
+        }
+    });
+
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
             state.type = card.getAttribute("data-type");
-            document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
-            card.classList.add("active");
             await loadUnits(state.type);
         });
     });
 
-    // ACTION MODE
     document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             state.action = btn.textContent.trim();
-            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
             updateInputStates();
             performCalculation();
         });
     });
 
-    // INPUT FROM
-    document.getElementById("input-from").addEventListener("input", (e) => {
-        state.fromVal = Number(e.target.value) || 0;
-        performCalculation();
-        
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            handleHistorySaving();
-        }, 5000); // 5 SECOND DELAY
-    });
-
-    // INPUT TO (For Comparison Mode)
-    document.getElementById("input-to").addEventListener("input", (e) => {
-        if (state.action === "Comparison") {
-            state.toVal = Number(e.target.value) || 0;
-            performCalculation();
-            
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                handleHistorySaving();
-            }, 5000); // 5 SECOND DELAY
-        }
-    });
-
-    // DROPDOWNS
     document.getElementById("select-from").addEventListener("change", (e) => {
         state.fromUnit = e.target.value;
         performCalculation();
+        triggerSave();
     });
 
     document.getElementById("select-to").addEventListener("change", (e) => {
         state.toUnit = e.target.value;
         performCalculation();
+        triggerSave();
     });
 }

@@ -4,26 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantity Measurement</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="css/styling.css">
 </head>
 
 <body>
-
     <header class="app-header">
         <h1 class="main-title font-inter">Quantity Measurement</h1>
     </header>
 
     <div class="main-wrapper">
-
         <div class="category-section">
             <span class="label-text font-inter">CHOOSE TYPE</span>
             <div class="grid-layout">
-                <div class="unit-box" data-type="length">
+                <div class="unit-box active" data-type="length">
                     <div class="icon-wrapper"><div>📏</div></div>
                     <div class="label-text font-inter box-label">Length</div>
                 </div>
@@ -41,18 +37,22 @@
                 </div>
             </div>
         </div>
-        <section class="history-section">
-    <h2 class="label-text font-inter">RECENT HISTORY</h2>
-    <div id="history-list">
-        </div>
-</section>
 
         <div class="mode-section">
             <span class="label-text font-inter">CHOOSE ACTION</span>
             <div class="button-group">
                 <button class="mode-btn">Comparison</button>
-                <button class="mode-btn">Conversion</button>
+                <button class="mode-btn active">Conversion</button>
                 <button class="mode-btn">Arithmetic</button>
+            </div>
+
+            <div id="operator-wrapper" style="display: none; margin-top: 10px; text-align: center;">
+                <select id="select-operator" class="unit-select font-inter" style="width: 60px;">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">*</option>
+                    <option value="/">/</option>
+                </select>
             </div>
 
             <div class="converter-panel">
@@ -77,15 +77,23 @@
                     </div>
                 </div>
             </div>
+
+            <div id="result-container" style="margin-top: 20px; text-align: center;">
+                <span class="label-text font-inter">LIVE RESULT</span>
+                <div id="result-text" class="font-inter" style="font-weight: bold; color: #4A90E2; margin-top: 5px;">
+                    ---
+                </div>
+            </div>
         </div>
+
+        <section class="history-section">
+            <h2 class="label-text font-inter">RECENT HISTORY</h2>
+            <div id="history-list">
+                <p class="no-history">No history yet.</p>
+            </div>
+        </section>
     </div>
 
-   
-    <script type="module" src="js/api.js"></script>
-    <script type="module" src="js/conversion.js"></script>
-
-
-    
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

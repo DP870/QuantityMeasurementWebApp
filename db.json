@@ -225,6 +225,78 @@
       "result": "12",
       "timestamp": "2026-03-22T08:17:32.940Z",
       "id": "CzvgrRJFOk4"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "67km + 67km",
+      "result": "067",
+      "timestamp": "2026-03-22T09:40:11.327Z",
+      "id": "sQgwcnDNw6c"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "67km to km",
+      "result": "67",
+      "timestamp": "2026-03-22T09:40:54.291Z",
+      "id": "VCeJMBHfAcM"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "545km + 89km",
+      "result": "634 km",
+      "timestamp": "2026-03-22T09:41:04.325Z",
+      "id": "zbwZ3qhG8oM"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "78km + 90km",
+      "result": "168 km",
+      "timestamp": "2026-03-22T09:48:14.389Z",
+      "id": "onUCndU5YQk"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "23 km to km",
+      "result": "23",
+      "timestamp": "2026-03-22T09:49:34.866Z",
+      "id": "rb_PxVEAJNs"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "90km + 78km",
+      "result": "168 km",
+      "timestamp": "2026-03-22T09:49:44.725Z",
+      "id": "VnFsE98WjrQ"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "890 km to mi",
+      "result": "553.021736",
+      "timestamp": "2026-03-22T09:49:57.329Z",
+      "id": "_VVzs3NgYn4"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "89km + 78km",
+      "result": "167 km",
+      "timestamp": "2026-03-22T09:50:36.217Z",
+      "id": "S3o7nhJFRMo"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "78 km to cm",
+      "result": "7800000",
+      "timestamp": "2026-03-22T09:50:54.769Z",
+      "id": "fC995CD7NGo"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

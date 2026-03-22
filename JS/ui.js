@@ -1,48 +1,38 @@
-
-
-export function populateDropdowns(units) {
-    const selects = document.querySelectorAll(".unit-select");
-    
-    // 1. Generate the HTML string for all options
-    // unit.label is the text (e.g., "Meter") 
-    // unit.symbol is the value (e.g., "m")
-    const optionsHTML = units.map(unit => 
-        `<option value="${unit.symbol}">${unit.label} (${unit.symbol})</option>`
-    ).join("");
-
-    // 2. Clear the old options and inject the new ones
-    selects.forEach(select => {
-        select.innerHTML = optionsHTML;
-    });
-}
-
-export function toggleOperators(show) {
-    // This can remain a placeholder for now
-    console.log("Arithmetic mode active:", show);
-}
-
-
-
 export function renderHistory(historyData) {
-    const historyContainer = document.getElementById("history-list"); 
-    // Ensure you have a <div id="history-list"> in your HTML
-    
-    if (!historyContainer) return;
+    const historyList = document.getElementById("history-list");
+    if (!historyList) return;
 
-    if (historyData.length === 0) {
-        historyContainer.innerHTML = `<p class="empty-msg">No history yet.</p>`;
+    if (!historyData || historyData.length === 0) {
+        historyList.innerHTML = `<p class="no-history">No history yet.</p>`;
         return;
     }
 
-    const historyHTML = historyData.map(record => `
-        <div class="history-item">
-            <div class="history-details">
-                <span class="history-exp">${record.expression} = ${record.result}</span>
-                <span class="history-type">${record.type} | ${record.action}</span>
+    const html = historyData.map(item => `
+        <div class="history-card">
+            <div class="history-main">
+                <strong>${item.expression}</strong>
             </div>
-            <span class="history-time">${new Date(record.timestamp).toLocaleTimeString()}</span>
+            <div class="history-result">= ${item.result}</div>
+            <div class="history-footer">
+                <span>${item.type} | ${item.action}</span>
+                <span>${new Date(item.timestamp).toLocaleTimeString()}</span>
+            </div>
         </div>
     `).join("");
 
-    historyContainer.innerHTML = historyHTML;
+    historyList.innerHTML = html;
+}
+
+export function populateDropdowns(units) {
+    const selectFrom = document.getElementById("select-from");
+    const selectTo = document.getElementById("select-to");
+
+    const options = units.map(u => `<option value="${u.symbol}">${u.label} (${u.symbol})</option>`).join("");
+    
+    selectFrom.innerHTML = options;
+    selectTo.innerHTML = options;
+}
+
+export function toggleOperators(show) {
+   
 }

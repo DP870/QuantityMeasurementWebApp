@@ -2,21 +2,19 @@
  * UC-JS-03: Populate Unit Dropdown
  */
 export function populateDropdown(selectEl, units) {
-    // Exception Flow: selectEl is null
     if (!selectEl) {
-        console.warn("Target select element is null.");
+        console.warn("selectEl is null");
         return;
     }
-
-    // Main Flow: Reset and add default
     selectEl.innerHTML = "";
+    
+    // Add disabled default prompt
     const defaultOpt = document.createElement("option");
     defaultOpt.disabled = true;
     defaultOpt.selected = true;
     defaultOpt.textContent = "-- Select Unit --";
     selectEl.appendChild(defaultOpt);
 
-    // Alternate Flow: Only add units if the array isn't empty
     if (units && units.length > 0) {
         units.forEach(u => {
             const opt = document.createElement("option");
@@ -28,43 +26,36 @@ export function populateDropdown(selectEl, units) {
 }
 
 /**
- * Helper to populate both dropdowns at once
+ * UC-JS-05: Render History List
  */
-export function populateDropdowns(units) {
-    const selectFrom = document.getElementById("select-from");
-    const selectTo = document.getElementById("select-to");
-    populateDropdown(selectFrom, units);
-    populateDropdown(selectTo, units);
-}
+export function renderHistory(records) {
+    const list = document.querySelector("#history-list");
+    if (!list) return;
 
-/**
- * Renders history cards into the list
- */
-export function renderHistory(historyData) {
-    const historyList = document.getElementById("history-list");
-    if (!historyList) return;
+    list.innerHTML = "";
 
-    if (!historyData || historyData.length === 0) {
-        historyList.innerHTML = `<p class="no-history">No history yet.</p>`;
+    // Exception Flow: records is undefined or empty
+    if (!records || !records.length) {
+        list.innerHTML = "<li>No history yet.</li>";
         return;
     }
 
-    historyList.innerHTML = historyData.map(item => `
-        <div class="history-card" style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px;">
-            <div style="font-size: 0.9rem; color: #666;">${item.type.toUpperCase()} | ${item.action}</div>
-            <div style="font-weight: bold; margin: 5px 0;">${item.expression}</div>
-            <div style="color: #4A90E2; font-weight: bold;">Result: ${item.result}</div>
-            <div style="font-size: 0.75rem; color: #999; margin-top: 5px;">${new Date(item.timestamp).toLocaleString()}</div>
-        </div>
-    `).join("");
+    // Main Flow: Newest-first (Assumes API returns sorted or sort here)
+    records.forEach(r => {
+        const li = document.createElement("li");
+        // Apply a class if you want specific styling for the list items
+        li.className = "history-item"; 
+        li.textContent = `${r.expression}  =  ${r.result}  (${new Date(r.timestamp).toLocaleString()})`;
+        list.appendChild(li);
+    });
 }
 
-/**
- * Toggles the visibility of the operator dropdown (+ - * /)
- */
+export function populateDropdowns(units) {
+    populateDropdown(document.getElementById("select-from"), units);
+    populateDropdown(document.getElementById("select-to"), units);
+}
+
 export function toggleOperators(show) {
     const wrapper = document.getElementById("operator-wrapper");
-    if (wrapper) {
-        wrapper.style.display = show ? "block" : "none";
-    }
+    if (wrapper) wrapper.style.display = show ? "block" : "none";
 }

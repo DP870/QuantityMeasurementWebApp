@@ -1,7 +1,7 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
 import { convert, compareValues, applyConversion, performArithmetic } from "./conversion.js";
-// Toggle for Arithmetic is done.
+// History has been implemented.
 const state = {
     type: "length",
     action: "Conversion",
@@ -17,13 +17,15 @@ const state = {
 let debounceTimer;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Initial UI Setup: Ensure 'Length' and 'Conversion' are highlighted on start
-    const defaultType = document.querySelector(`.unit-box[data-type="${state.type}"]`);
-    const defaultAction = Array.from(document.querySelectorAll(".mode-btn")).find(btn => btn.textContent.trim() === state.action);
-    
-    if (defaultType) defaultType.classList.add("active");
-    if (defaultAction) defaultAction.classList.add("active");
+    // 1. Initial Highlight Setup
+    const defaultTypeBtn = document.querySelector(`.unit-box[data-type="${state.type}"]`);
+    const defaultActionBtn = Array.from(document.querySelectorAll(".mode-btn"))
+                                   .find(btn => btn.textContent.trim() === state.action);
 
+    if (defaultTypeBtn) defaultTypeBtn.classList.add("active");
+    if (defaultActionBtn) defaultActionBtn.classList.add("active");
+
+    // 2. Load Data
     await loadUnits(state.type);
     await loadHistory();
     attachEventListeners();
@@ -51,10 +53,9 @@ async function loadHistory() {
 
 function updateInputStates() {
     const toInput = document.getElementById("input-to");
-    if (state.action === "Conversion") {
-        toInput.setAttribute("readonly", true);
-    } else {
-        toInput.removeAttribute("readonly");
+    toInput.readOnly = (state.action === "Conversion");
+    if (state.action !== "Conversion") {
+        toInput.value = state.toVal || "";
     }
 }
 
@@ -106,28 +107,24 @@ async function handleHistorySaving() {
 function attachEventListeners() {
     const triggerSave = () => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => handleHistorySaving(), 5000);
+        debounceTimer = setTimeout(() => handleHistorySaving(), 5000); // 5s Delay
     };
 
-    // 1. UNIT TYPE SELECTION (Highlights Length, Weight, etc.)
+    // UNIT BOX HIGHLIGHTING
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
-            // Remove active from all types, add to clicked one
             document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
             card.classList.add("active");
-
             state.type = card.getAttribute("data-type");
             await loadUnits(state.type);
         });
     });
 
-    // 2. ACTION SELECTION (Highlights Conversion, Comparison, Arithmetic)
+    // MODE BUTTON HIGHLIGHTING
     document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            // Remove active from all buttons, add to clicked one
             document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
-
             state.action = btn.textContent.trim();
             updateInputStates();
             toggleOperators(state.action === "Arithmetic");
@@ -135,7 +132,6 @@ function attachEventListeners() {
         });
     });
 
-    // 3. INPUT FIELDS
     document.getElementById("input-from").addEventListener("input", (e) => {
         state.fromVal = Number(e.target.value) || 0;
         performCalculation();
@@ -150,7 +146,6 @@ function attachEventListeners() {
         }
     });
 
-    // 4. DROPDOWNS & OPERATORS
     document.getElementById("select-operator").addEventListener("change", (e) => {
         state.operator = e.target.value;
         performCalculation();

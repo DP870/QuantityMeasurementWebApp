@@ -329,6 +329,54 @@
       "result": "89 mi is LESS than 7690900000 in",
       "timestamp": "2026-03-22T10:14:24.121Z",
       "id": "XdXwaqxGdu8"
+    },
+    {
+      "type": "weight",
+      "action": "Conversion",
+      "expression": "12kg to g",
+      "result": "12000 g",
+      "timestamp": "2026-03-22T10:37:17.661Z",
+      "id": "LYp2LEL6GN0"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "23232in + 12ft",
+      "result": "23376 in",
+      "timestamp": "2026-03-22T10:45:56.871Z",
+      "id": "Ti9w5uCqXsY"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "1212m to km",
+      "result": "1232",
+      "timestamp": "2026-03-22T10:46:11.807Z",
+      "id": "bIg6FwOG_N4"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "12cm + 2132m",
+      "result": "213212 cm",
+      "timestamp": "2026-03-22T10:46:58.331Z",
+      "id": "cdVaLJEM_Ww"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "12cm + 23m",
+      "result": "2312 cm",
+      "timestamp": "2026-03-22T10:47:21.331Z",
+      "id": "XIkiP_wR-8I"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "12km + 12000m",
+      "result": "12 km is EQUAL to 12000 m",
+      "timestamp": "2026-03-22T10:48:10.662Z",
+      "id": "DPyDvHHWBWA"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

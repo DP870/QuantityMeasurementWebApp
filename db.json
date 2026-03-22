@@ -297,6 +297,22 @@
       "result": "7800000",
       "timestamp": "2026-03-22T09:50:54.769Z",
       "id": "fC995CD7NGo"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "1212km to mm",
+      "result": "1212000000 mm",
+      "timestamp": "2026-03-22T09:59:56.334Z",
+      "id": "XyUoS09GzbQ"
+    },
+    {
+      "type": "length",
+      "action": "Arithmetic",
+      "expression": "121km * 3232km",
+      "result": "391072 km",
+      "timestamp": "2026-03-22T10:00:10.302Z",
+      "id": "Bvtq_EoOveE"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

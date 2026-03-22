@@ -30,126 +30,121 @@ async function loadUnits(type) {
     }
     if (units && units.length > 0) {
         state.unitsData = units;
+        // Default units (Select the first options after prompt)
         state.fromUnit = units[0].symbol;
         state.toUnit = units[0].symbol;
+        
         populateDropdowns(units);
+        
+        // Match the state to the newly populated dropdowns
+        document.getElementById("select-from").value = state.fromUnit;
+        document.getElementById("select-to").value = state.toUnit;
+        
         performCalculation();
     }
 }
 
 async function loadHistory() {
     const historyData = await getHistory();
-    console.log("History loaded from DB:", historyData); // Debugging line
     renderHistory(historyData);
 }
 
 function updateInputStates() {
     const toInput = document.getElementById("input-to");
+    const resultText = document.getElementById("result-text");
+
     if (state.action === "Conversion") {
         toInput.setAttribute("readonly", true);
+        resultText.textContent = "---";
     } else {
         toInput.removeAttribute("readonly");
+        toInput.value = state.toVal || "";
+        resultText.textContent = "Enter second value...";
     }
 }
 
 function performCalculation() {
     const outputField = document.getElementById("input-to");
-    const resultText = document.getElementById("result-text"); // The new div
+    const resultDisplay = document.getElementById("result-text");
     
     const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
     const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
 
     if (!unitFrom || !unitTo) return;
 
-    if (state.action === "Arithmetic") {
-        const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
-        const result = performArithmetic(state.fromVal, v2normalised, state.operator);
-        resultText.textContent = `${result} ${state.fromUnit}`;
-    } 
-    else if (state.action === "Comparison") {
-        const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
-        const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
-        resultText.textContent = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
-    } 
-    else {
-        const result = convert(state.fromVal, unitFrom, unitTo, state.formulas);
-        outputField.value = result;
-        resultText.textContent = `${result} ${state.toUnit}`;
+    try {
+        if (state.action === "Arithmetic") {
+            const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
+            const result = performArithmetic(state.fromVal, v2normalised, state.operator);
+            resultDisplay.textContent = `${result} ${state.fromUnit}`;
+        } 
+        else if (state.action === "Comparison") {
+            const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
+            const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
+            resultDisplay.textContent = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
+        } 
+        else {
+            const result = convert(state.fromVal, unitFrom, unitTo, state.formulas);
+            outputField.value = result;
+            resultDisplay.textContent = `${result} ${state.toUnit}`;
+        }
+    } catch (err) {
+        resultDisplay.textContent = err.message;
     }
 }
 
 async function handleHistorySaving() {
-    // SECURITY CHECK: Don't save if values are zero
-    if (state.fromVal === 0 && state.toVal === 0) {
-        console.warn("Save cancelled: Values are zero.");
-        return;
-    }
+    if (state.fromVal === 0 && state.toVal === 0) return;
 
-    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
-    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
-    let displayResult = "";
-    let expression = "";
-
-    if (state.action === "Arithmetic") {
-        const v2normalised = convert(state.toVal, unitTo, unitFrom, state.formulas);
-        const result = performArithmetic(state.fromVal, v2normalised, state.operator);
-        displayResult = `${result} ${state.fromUnit}`;
-        expression = `${state.fromVal}${state.fromUnit} ${state.operator} ${state.toVal}${state.toUnit}`;
-    } else if (state.action === "Comparison") {
-        const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
-        const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
-        displayResult = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
-        expression = `${state.fromVal}${state.fromUnit} vs ${state.toVal}${state.toUnit}`;
-    } else {
-        displayResult = document.getElementById("input-to").value;
-        expression = `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`;
-    }
-
+    const resultDisplay = document.getElementById("result-text");
     const record = {
         type: state.type,
         action: state.action,
-        expression: expression,
-        result: displayResult,
+        expression: state.action === "Conversion" 
+            ? `${state.fromVal}${state.fromUnit} to ${state.toUnit}`
+            : `${state.fromVal}${state.fromUnit} ${state.operator || 'vs'} ${state.toVal}${state.toUnit}`,
+        result: resultDisplay.textContent,
         timestamp: new Date().toISOString()
     };
 
-    console.log("Attempting to save record:", record);
-
-    try {
-        await saveHistory(record);
-        await loadHistory(); // Refresh the list
-    } catch (err) {
-        console.error("Failed to save to db.json. Is json-server running?", err);
-    }
+    await saveHistory(record);
+    await loadHistory();
 }
 
 function attachEventListeners() {
-    const fromInput = document.getElementById("input-from");
-    const toInput = document.getElementById("input-to");
-
     const triggerSave = () => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            handleHistorySaving();
-        }, 5000); // 5 seconds
+        debounceTimer = setTimeout(() => handleHistorySaving(), 5000);
     };
 
-    fromInput.addEventListener("input", (e) => {
+    // INPUTS
+    document.getElementById("input-from").addEventListener("input", (e) => {
         state.fromVal = Number(e.target.value) || 0;
         performCalculation();
         triggerSave();
     });
 
-    toInput.addEventListener("input", (e) => {
+    document.getElementById("input-to").addEventListener("input", (e) => {
         if (state.action !== "Conversion") {
             state.toVal = Number(e.target.value) || 0;
+            performCalculation();
             triggerSave();
         }
     });
 
+    // OPERATOR SELECT
+    document.getElementById("select-operator").addEventListener("change", (e) => {
+        state.operator = e.target.value;
+        performCalculation();
+        triggerSave();
+    });
+
+    // CATEGORY/MODE
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
             state.type = card.getAttribute("data-type");
+            document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
             await loadUnits(state.type);
         });
     });
@@ -157,11 +152,15 @@ function attachEventListeners() {
     document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             state.action = btn.textContent.trim();
+            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
             updateInputStates();
+            toggleOperators(state.action === "Arithmetic");
             performCalculation();
         });
     });
 
+    // DROPDOWNS
     document.getElementById("select-from").addEventListener("change", (e) => {
         state.fromUnit = e.target.value;
         performCalculation();

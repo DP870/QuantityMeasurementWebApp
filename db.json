@@ -1,25 +1,211 @@
 {
   "units": [
-    { "id": 1, "type": "length", "label": "Meter", "symbol": "m" },
-    { "id": 2, "type": "weight", "label": "Kilogram", "symbol": "kg" },
-    { "id": 3, "type": "temperature", "label": "Celsius", "symbol": "°C" },
-    { "id": 4, "type": "volume", "label": "Litre", "symbol": "L" }
+    {
+      "id": "1",
+      "type": "length",
+      "label": "Kilometer",
+      "symbol": "km",
+      "base_factor": 1000
+    },
+    {
+      "id": "2",
+      "type": "length",
+      "label": "Meter",
+      "symbol": "m",
+      "base_factor": 1
+    },
+    {
+      "id": "3",
+      "type": "length",
+      "label": "Centimeter",
+      "symbol": "cm",
+      "base_factor": 0.01
+    },
+    {
+      "id": "4",
+      "type": "length",
+      "label": "Millimeter",
+      "symbol": "mm",
+      "base_factor": 0.001
+    },
+    {
+      "id": "5",
+      "type": "length",
+      "label": "Mile",
+      "symbol": "mi",
+      "base_factor": 1609.34
+    },
+    {
+      "id": "6",
+      "type": "length",
+      "label": "Inch",
+      "symbol": "in",
+      "base_factor": 0.0254
+    },
+    {
+      "id": "7",
+      "type": "length",
+      "label": "Feet",
+      "symbol": "ft",
+      "base_factor": 0.3048
+    },
+    {
+      "id": "8",
+      "type": "weight",
+      "label": "Tonne",
+      "symbol": "t",
+      "base_factor": 1000000
+    },
+    {
+      "id": "9",
+      "type": "weight",
+      "label": "Kilogram",
+      "symbol": "kg",
+      "base_factor": 1000
+    },
+    {
+      "id": "10",
+      "type": "weight",
+      "label": "Gram",
+      "symbol": "g",
+      "base_factor": 1
+    },
+    {
+      "id": "11",
+      "type": "weight",
+      "label": "Milligram",
+      "symbol": "mg",
+      "base_factor": 0.001
+    },
+    {
+      "id": "12",
+      "type": "weight",
+      "label": "Pound",
+      "symbol": "lb",
+      "base_factor": 453.592
+    },
+    {
+      "id": "13",
+      "type": "weight",
+      "label": "Ounce",
+      "symbol": "oz",
+      "base_factor": 28.3495
+    },
+    {
+      "id": "14",
+      "type": "temperature",
+      "label": "Celsius",
+      "symbol": "°C",
+      "base_factor": null
+    },
+    {
+      "id": "15",
+      "type": "temperature",
+      "label": "Fahrenheit",
+      "symbol": "°F",
+      "base_factor": null
+    },
+    {
+      "id": "16",
+      "type": "temperature",
+      "label": "Kelvin",
+      "symbol": "K",
+      "base_factor": null
+    },
+    {
+      "id": "17",
+      "type": "volume",
+      "label": "Litre",
+      "symbol": "L",
+      "base_factor": 1
+    },
+    {
+      "id": "18",
+      "type": "volume",
+      "label": "Millilitre",
+      "symbol": "ml",
+      "base_factor": 0.001
+    },
+    {
+      "id": "19",
+      "type": "volume",
+      "label": "Gallon",
+      "symbol": "gal",
+      "base_factor": 3.78541
+    },
+    {
+      "id": "20",
+      "type": "volume",
+      "label": "Cup",
+      "symbol": "cup",
+      "base_factor": 0.24
+    }
   ],
   "conversions": [
     {
-      "id": 1,
-      "from": "km",
-      "to": "m",
-      "factor": 1000,
-      "formula": null
+      "id": "1",
+      "type": "temperature",
+      "from": "°C",
+      "to": "°F",
+      "formula": "(x * 9/5) + 32"
     },
     {
-      "id": 2,
-      "from": "C",
-      "to": "F",
-      "factor": null,
-      "formula": "(x*9/5)+32"
+      "id": "2",
+      "type": "temperature",
+      "from": "°F",
+      "to": "°C",
+      "formula": "(x - 32) * 5/9"
     }
   ],
-  "history": []
+  "history": [
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "2 km to km",
+      "result": 2,
+      "timestamp": "2026-03-22T06:59:40.877Z",
+      "id": "JiKwq0fQozg"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "2 km to km",
+      "result": 2,
+      "timestamp": "2026-03-22T06:59:42.721Z",
+      "id": "gQqyOqmEHU8"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "20 km to km",
+      "result": 20,
+      "timestamp": "2026-03-22T06:59:42.859Z",
+      "id": "5cNZeQQNLjQ"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "2 km to km",
+      "result": 2,
+      "timestamp": "2026-03-22T06:59:44.296Z",
+      "id": "byovQ2NBcqA"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "2 km to km",
+      "result": 2,
+      "timestamp": "2026-03-22T06:59:51.101Z",
+      "id": "CL1GWiHlCuw"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "2 km to km",
+      "result": 2,
+      "timestamp": "2026-03-22T06:59:54.796Z",
+      "id": "-S6LtmOuZQI"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

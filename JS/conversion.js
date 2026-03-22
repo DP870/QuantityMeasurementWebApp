@@ -9,55 +9,29 @@ function evalFormula(formula, x) {
 }
 
 
-// ------------------------------------------------------
-// UC‑JS‑05 : CONVERSION ENGINE
-// ------------------------------------------------------
-export async function convert(value, fromUnit, toUnit) {
-    if (fromUnit === toUnit) return value; // alternate flow: direct return
+// js/conversion.js
+export function convert(value, unitFrom, unitTo) {
+    if (value === 0) return 0;
 
-    try {
-        const conv = await getConversion(fromUnit, toUnit);
+    // Handle Temperature (requires formulas, not just factors)
+    if (unitFrom.type === "temperature") {
+        if (unitFrom.symbol === unitTo.symbol) return value;
+        
+        let result = value;
+        // Convert to Celsius first as base
+        if (unitFrom.symbol === "°F") result = (value - 32) * 5/9;
+        if (unitFrom.symbol === "K") result = value - 273.15;
 
-        if (conv.factor !== null) {
-            return value * conv.factor; // simple multiplication
-        }
-
-        if (conv.formula !== null) {
-            return evalFormula(conv.formula, value); // temperature formulas
-        }
+        // Convert from Celsius to Target
+        if (unitTo.symbol === "°F") return (result * 9/5) + 32;
+        if (unitTo.symbol === "K") return result + 273.15;
+        return result; // return Celsius
     }
-    catch (err) {
-        console.error("convert() failed:", err);
-        return null;
-    }
-}
 
-
-// ------------------------------------------------------
-// UC‑JS‑05 Additional: Comparison
-// ------------------------------------------------------
-export async function compare(v1, unit1, v2, unit2) {
-    const converted = await convert(v2, unit2, unit1);
-    if (converted === null) return null;
-
-    if (v1 > converted) return ">";
-    if (v1 < converted) return "<";
-    return "=";
-}
-
-
-// ------------------------------------------------------
-// UC‑JS‑05 Additional: Arithmetic (+, -, *, /)
-// ------------------------------------------------------
-export async function arithmetic(v1, unit1, v2, unit2, operator) {
-    const v2Converted = await convert(v2, unit2, unit1);
-    if (v2Converted === null) return null;
-
-    switch (operator) {
-        case "+": return v1 + v2Converted;
-        case "-": return v1 - v2Converted;
-        case "*": return v1 * v2Converted;
-        case "/": return v1 / v2Converted;
-        default: return null;
-    }
+    // Handle Length, Weight, Volume using base_factor
+    // Logic: (Value * FromFactor) / ToFactor
+    const result = (value * unitFrom.base_factor) / unitTo.base_factor;
+    
+    // Round to 4 decimal places to keep it clean
+    return Math.round(result * 10000) / 10000;
 }

@@ -1,64 +1,53 @@
-import { getUnits } from "./api.js";
+import { getUnits,saveHistory } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
+
+import { convert } from "./conversion.js"; // We will add the conversion logic here
 
 // ------------------------------------------------------
 // GLOBAL STATE
 // ------------------------------------------------------
 const state = {
-    type: "Length",
+    type: "length",
     action: "Conversion",
-    fromVal: null,
+    fromVal: 0,
     fromUnit: "",
-    toVal: null,
     toUnit: "",
-    operator: "+"
+    unitsData: [] // Store current units for quick math access
 };
 
-
 // ------------------------------------------------------
-// APP INITIALISATION (UC‑JS‑02/03/04)
+// APP INITIALISATION
 // ------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
-    console.log("App Loaded.");
+    console.log("App Initialized.");
 
-    attachEventListeners();
-
-    await loadUnits("length"); // default category
-
-    // Set first type card active
+    // 1. Set default UI states
     const typeCards = document.querySelectorAll(".unit-box");
-    if (typeCards.length) typeCards[0].classList.add("active");
-
-    // Set Conversion button active
     const modeButtons = document.querySelectorAll(".mode-btn");
+    
+    if (typeCards.length) typeCards[0].classList.add("active");
     if (modeButtons.length) modeButtons[1].classList.add("active");
 
-    toggleOperators(false);
-
-    await loadHistory();
+    // 2. Load initial data
+    await loadUnits(state.type);
+    
+    // 3. Start listening for user interaction
+    attachEventListeners();
 });
 
-
 // ------------------------------------------------------
-// LOAD UNITS for a type (UC‑JS‑03)
+// LOAD UNITS (Fetches from db.json via api.js)
 // ------------------------------------------------------
 async function loadUnits(type) {
-    const units = await getUnits(type);
-
-    if (!units) {
-        console.error("Could not load units");
-        return;
+    const units = await getUnits(type.toLowerCase());
+    if (units && units.length > 0) {
+        state.unitsData = units; // Save to state for math logic
+        state.fromUnit = units[0].symbol;
+        state.toUnit = units[0].symbol;
+        
+        populateDropdowns(units);
+        performCalculation(); // Reset calc with new units
     }
-
-    populateDropdowns(units);
-}
-
-
-// ------------------------------------------------------
-// HISTORY LOADER (UC‑JS‑07 later)
-// ------------------------------------------------------
-async function loadHistory() {
-    renderHistory([]); // placeholder
 }
 
 
@@ -66,49 +55,63 @@ async function loadHistory() {
 // EVENT LISTENERS
 // ------------------------------------------------------
 function attachEventListeners() {
-
-    // TYPE CARDS
-    const typeCards = document.querySelectorAll(".unit-box");
-    typeCards.forEach(card => {
+    // 1. TYPE CARDS (Length, Weight, etc.)
+    document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
             const selected = card.querySelector(".box-label").textContent.trim().toLowerCase();
             state.type = selected;
 
-            typeCards.forEach(c => c.classList.remove("active"));
+            document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
             card.classList.add("active");
 
             await loadUnits(selected);
         });
     });
 
-    // ACTION BUTTONS (Comparison, Conversion, Arithmetic)
-    const buttons = document.querySelectorAll(".mode-btn");
-    buttons.forEach(btn => {
+    // 2. ACTION BUTTONS (Comparison, Conversion, Arithmetic)
+    document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             const action = btn.textContent.trim();
             state.action = action;
 
-            buttons.forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
 
             toggleOperators(action === "Arithmetic");
         });
     });
 
-    // INPUT FIELDS
-    const inputs = document.querySelectorAll(".value-input");
-    inputs.forEach((input, index) => {
-        input.addEventListener("input", () => {
-            if (index === 0) state.fromVal = Number(input.value);
-        });
+    // 3. INPUT FIELD (Left side)
+    const fromInput = document.querySelector(".value-input:not([readonly])");
+    fromInput.addEventListener("input", (e) => {
+        state.fromVal = Number(e.target.value) || 0;
+        performCalculation();
     });
 
-    // DROPDOWNS
+    // 4. DROPDOWNS
     const selects = document.querySelectorAll(".unit-select");
-    selects.forEach((select, index) => {
-        select.addEventListener("change", () => {
-            if (index === 0) state.fromUnit = select.value;
-            if (index === 1) state.toUnit = select.value;
-        });
+    selects[0].addEventListener("change", (e) => {
+        state.fromUnit = e.target.value;
+        performCalculation();
     });
+    selects[1].addEventListener("change", (e) => {
+        state.toUnit = e.target.value;
+        performCalculation();
+    });
+}
+
+function performCalculation() {
+    // If data hasn't loaded yet, stop the function
+    if (!state.unitsData || state.unitsData.length === 0 || !state.fromUnit) {
+        return; 
+    }
+
+    const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
+    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
+
+    // Ensure BOTH units were found before doing math
+    if (unitFrom && unitTo) {
+        const result = convert(state.fromVal, unitFrom, unitTo);
+        document.getElementById("input-to").value = result;
+    }
 }

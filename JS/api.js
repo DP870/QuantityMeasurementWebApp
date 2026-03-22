@@ -1,52 +1,42 @@
-// ------------------------------------------------------
-// BASE URL FOR JSON‑SERVER
-// ------------------------------------------------------
-export const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://localhost:3000";
 
-
-// ------------------------------------------------------
-// UC‑JS‑03 : Fetch Units for Selected Type
-// /units?type=length
-// ------------------------------------------------------
 export async function getUnits(type) {
     try {
-        const res = await fetch(`${BASE_URL}/units?type=${type}`);
-
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
-
-        return await res.json(); // always an array
-    }
-    catch (err) {
-        console.error("getUnits() failed:", err);
-        return null; // caller will show error UI
+        // We fetch ALL units and filter them in JavaScript to avoid URL encoding issues
+        const response = await fetch("http://localhost:3000/units");
+        const allUnits = await response.json();
+        
+        // This ensures "Weight" matches "weight"
+        return allUnits.filter(u => u.type.toLowerCase() === type.toLowerCase());
+    } catch (error) {
+        console.error("Error fetching units:", error);
+        return [];
     }
 }
 
-
-// ------------------------------------------------------
-// UC‑JS‑04 : Fetch Conversion Record
-// /conversions?from=km&to=m
-// ------------------------------------------------------
-export async function getConversion(from, to) {
+export async function getConversion() {
     try {
-        const res = await fetch(`${BASE_URL}/conversions?from=${from}&to=${to}`);
-
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
-
-        const data = await res.json(); // always returns array
-
-        if (!data.length) {
-            throw new Error("No conversion found");
-        }
-
-        return data[0]; // json-server always returns an array
+        const response = await fetch(`${BASE_URL}/conversions`);
+        return await response.json();
+    } catch (error) {
+        console.error("Conversion fetch error:", error);
+        return [];
     }
-    catch (err) {
-        console.error("getConversion() failed:", err);
-        throw err; // propagate to conversion.js or app.js
+}
+export async function saveHistory(record) {
+    try {
+        const res = await fetch(`${BASE_URL}/history`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(record)
+        });
+        
+        if (!res.ok) throw new Error("Failed to save history");
+        
+        return await res.json();
+    } catch (error) {
+        // Exception Flow: Log error but do not block the user
+        console.error("History Save Error:", error);
+        return null; 
     }
 }

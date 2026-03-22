@@ -313,6 +313,22 @@
       "result": "391072 km",
       "timestamp": "2026-03-22T10:00:10.302Z",
       "id": "Bvtq_EoOveE"
+    },
+    {
+      "type": "volume",
+      "action": "Arithmetic",
+      "expression": "87L * 90ml",
+      "result": "7.83 L",
+      "timestamp": "2026-03-22T10:14:02.849Z",
+      "id": "maDLSgHpwFo"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "89mi + 7690900000in",
+      "result": "89 mi is LESS than 7690900000 in",
+      "timestamp": "2026-03-22T10:14:24.121Z",
+      "id": "XdXwaqxGdu8"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

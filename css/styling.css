@@ -14,7 +14,26 @@ html, body {
 * {
     box-sizing: border-box;
 }
+/* Highlight for Unit Type Cards (Length, Weight, etc.) */
+.unit-box.active {
+    border: 2px solid #4A90E2;
+    background-color: #f0f7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.2);
+}
 
+.unit-box.active .icon-wrapper {
+    background-color: #4A90E2;
+    color: white;
+}
+
+/* Highlight for Action Buttons (Conversion, Comparison, etc.) */
+.mode-btn.active {
+    background-color: #4A90E2;
+    color: white;
+    border-color: #4A90E2;
+    font-weight: bold;
+}
 
 .app-header {
     width: min(92vw, 1200px);

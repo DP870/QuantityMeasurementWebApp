@@ -1,7 +1,7 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
 import { convert, compareValues, applyConversion, performArithmetic } from "./conversion.js";
-
+//Show result has been implemented. (UC12)
 const state = {
     type: "length",
     action: "Conversion",
@@ -17,7 +17,7 @@ const state = {
 let debounceTimer;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // Initial UI Setup: Ensure 'Length' and 'Conversion' are highlighted on start
+    
     const defaultType = document.querySelector(`.unit-box[data-type="${state.type}"]`);
     const defaultAction = Array.from(document.querySelectorAll(".mode-btn")).find(btn => btn.textContent.trim() === state.action);
     
@@ -62,7 +62,7 @@ function performCalculation() {
     const outputField = document.getElementById("input-to");
     const resultDisplay = document.getElementById("result-text");
     const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
-    const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
+    const unitTo = state.unitsData.find(u =>u.symbol === state.toUnit);
 
     if (!unitFrom || !unitTo) return;
 
@@ -108,11 +108,9 @@ function attachEventListeners() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => handleHistorySaving(), 5000);
     };
-
-    // 1. UNIT TYPE SELECTION (Highlights Length, Weight, etc.)
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
-            // Remove active from all types, add to clicked one
+            
             document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
             card.classList.add("active");
 
@@ -121,7 +119,7 @@ function attachEventListeners() {
         });
     });
 
-    // 2. ACTION SELECTION (Highlights Conversion, Comparison, Arithmetic)
+
     document.querySelectorAll(".mode-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             // Remove active from all buttons, add to clicked one

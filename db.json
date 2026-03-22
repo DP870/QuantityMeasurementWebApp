@@ -193,6 +193,38 @@
       "result": "0.9",
       "timestamp": "2026-03-22T08:14:42.086Z",
       "id": "jCgksXbJTFU"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "1212 km to km",
+      "result": "1212",
+      "timestamp": "2026-03-22T08:17:05.510Z",
+      "id": "--Jjm3pKAog"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "2323 km to km",
+      "result": "2323",
+      "timestamp": "2026-03-22T08:17:14.068Z",
+      "id": "YwtsnlGVIss"
+    },
+    {
+      "type": "length",
+      "action": "Conversion",
+      "expression": "12112 km to mi",
+      "result": "7526.066586",
+      "timestamp": "2026-03-22T08:17:23.589Z",
+      "id": "5jIVCfpcJI4"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "222km vs 12mi",
+      "result": "12",
+      "timestamp": "2026-03-22T08:17:32.940Z",
+      "id": "CzvgrRJFOk4"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

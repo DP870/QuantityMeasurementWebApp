@@ -1,39 +1,32 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
-import { convert } from "./conversion.js";
+import { convert, compareValues, applyConversion } from "./conversion.js";
 
 const state = {
     type: "length",
-    action: "Conversion",
+    action: "Comparison", // Default action
     fromVal: 0,
+    toVal: 0,      // New: second value for comparison
     fromUnit: "",
     toUnit: "",
     unitsData: [],
-    formulas: [] // New: Stores temperature formulas from UC-JS-07
+    formulas: []
 };
 
 let debounceTimer;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const typeCards = document.querySelectorAll(".unit-box");
-    const modeButtons = document.querySelectorAll(".mode-btn");
-    
-    if (typeCards.length) typeCards[0].classList.add("active");
-    if (modeButtons.length) modeButtons[1].classList.add("active");
-
     await loadUnits(state.type);
     await loadHistory();
     attachEventListeners();
+    updateInputStates(); // Initial UI check
 });
 
 async function loadUnits(type) {
     const units = await getUnits(type.toLowerCase());
-    
-    // UC-JS-07: If temperature, fetch formulas too
     if (type.toLowerCase() === "temperature") {
         state.formulas = await getConversions(); 
     }
-
     if (units && units.length > 0) {
         state.unitsData = units;
         state.fromUnit = units[0].symbol;
@@ -48,76 +41,112 @@ async function loadHistory() {
     renderHistory(historyData);
 }
 
+// Controls whether the second box is "Read Only" or "Editable"
+function updateInputStates() {
+    const toInput = document.getElementById("input-to");
+    if (state.action === "Comparison") {
+        toInput.removeAttribute("readonly");
+        toInput.placeholder = "Enter second value";
+    } else {
+        toInput.setAttribute("readonly", true);
+        toInput.placeholder = "Result";
+    }
+}
+
 function performCalculation() {
     const outputField = document.getElementById("input-to");
     const unitFrom = state.unitsData.find(u => u.symbol === state.fromUnit);
     const unitTo = state.unitsData.find(u => u.symbol === state.toUnit);
 
-    if (unitFrom && unitTo) {
-        // Pass state.formulas for UC-JS-07 compliance
+    if (!unitFrom || !unitTo) return;
+
+    if (state.action === "Comparison") {
+        // Normalise both to base units for comparison
+        const base1 = applyConversion(state.fromVal, { factor: unitFrom.base_factor || 1 });
+        const base2 = applyConversion(state.toVal, { factor: unitTo.base_factor || 1 });
+        
+        const comparisonResult = compareValues(state.fromVal, state.fromUnit, state.toVal, state.toUnit, base1, base2);
+        console.log("Comparison result:", comparisonResult); 
+        // Note: In comparison mode, we usually log or show a label. 
+        // If you want to see the text in the box, uncomment next line:
+        // outputField.value = comparisonResult; 
+    } else {
         const result = convert(state.fromVal, unitFrom, unitTo, state.formulas);
         outputField.value = result;
     }
 }
 
 async function handleHistorySaving() {
-    if (state.fromVal === 0) return;
+    if (state.fromVal === 0 && state.toVal === 0) return;
 
     const record = {
         type: state.type,
         action: state.action,
-        expression: `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`,
+        expression: state.action === "Comparison" 
+            ? `${state.fromVal}${state.fromUnit} vs ${state.toVal}${state.toUnit}`
+            : `${state.fromVal} ${state.fromUnit} to ${state.toUnit}`,
         result: document.getElementById("input-to").value,
         timestamp: new Date().toISOString()
     };
 
-    try {
-        await saveHistory(record);
-        await loadHistory();
-    } catch (error) {
-        console.error("History save failed:", error);
-    }
+    await saveHistory(record);
+    await loadHistory();
 }
 
 function attachEventListeners() {
-    // 1. UNIT TYPE SELECTION
+    // UNIT TYPE
     document.querySelectorAll(".unit-box").forEach(card => {
         card.addEventListener("click", async () => {
-            const selected = card.getAttribute("data-type") || card.querySelector(".box-label").textContent.trim().toLowerCase();
-            state.type = selected;
+            state.type = card.getAttribute("data-type");
             document.querySelectorAll(".unit-box").forEach(c => c.classList.remove("active"));
             card.classList.add("active");
-            await loadUnits(selected);
+            await loadUnits(state.type);
         });
     });
 
-    // 2. INPUT FIELD (Anti-Reset/Reload)
-    const fromInput = document.getElementById("input-from");
-    fromInput.addEventListener("input", (e) => {
-        if (e.target.value === "") {
-            state.fromVal = 0;
-            document.getElementById("input-to").value = 0;
-            return; 
-        }
-        state.fromVal = Number(e.target.value);
-        performCalculation();
+    // ACTION MODE
+    document.querySelectorAll(".mode-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            state.action = btn.textContent.trim();
+            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            updateInputStates();
+            performCalculation();
+        });
+    });
 
+    // INPUT FROM
+    document.getElementById("input-from").addEventListener("input", (e) => {
+        state.fromVal = Number(e.target.value) || 0;
+        performCalculation();
+        
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             handleHistorySaving();
-        }, 500);
+        }, 5000); // 5 SECOND DELAY
     });
 
-    // 3. DROPDOWNS
+    // INPUT TO (For Comparison Mode)
+    document.getElementById("input-to").addEventListener("input", (e) => {
+        if (state.action === "Comparison") {
+            state.toVal = Number(e.target.value) || 0;
+            performCalculation();
+            
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                handleHistorySaving();
+            }, 5000); // 5 SECOND DELAY
+        }
+    });
+
+    // DROPDOWNS
     document.getElementById("select-from").addEventListener("change", (e) => {
         state.fromUnit = e.target.value;
         performCalculation();
-        handleHistorySaving();
     });
 
     document.getElementById("select-to").addEventListener("change", (e) => {
         state.toUnit = e.target.value;
         performCalculation();
-        handleHistorySaving();
     });
 }

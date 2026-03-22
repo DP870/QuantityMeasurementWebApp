@@ -377,6 +377,14 @@
       "result": "12 km is EQUAL to 12000 m",
       "timestamp": "2026-03-22T10:48:10.662Z",
       "id": "DPyDvHHWBWA"
+    },
+    {
+      "type": "length",
+      "action": "Comparison",
+      "expression": "12121mm + 12121cm",
+      "result": "\n                    ---\n                ",
+      "timestamp": "2026-03-22T13:12:08.342Z",
+      "id": "LAxUGwE9t_8"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

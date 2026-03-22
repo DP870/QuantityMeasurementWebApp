@@ -1,6 +1,4 @@
-/**
- * UC-JS-03: Populate Unit Dropdown
- */
+
 export function populateDropdown(selectEl, units) {
     if (!selectEl) {
         console.warn("selectEl is null");

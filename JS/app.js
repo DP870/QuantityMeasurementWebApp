@@ -1,7 +1,7 @@
 import { getUnits, saveHistory, getHistory, getConversions } from "./api.js";
 import { populateDropdowns, toggleOperators, renderHistory } from "./ui.js";
 import { convert, compareValues, applyConversion, performArithmetic } from "./conversion.js";
-// History has been implemented.
+// The webpage reloads and clears history after a measurement has been calculated. 
 const state = {
     type: "length",
     action: "Conversion",

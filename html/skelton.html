@@ -2,89 +2,74 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantity Measurement</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/styling.css">
 </head>
 <body>
-    <header class="head">
-        <h1 class="heading-primary inter-body">Welcome To Quantity Measurement</h1>
+    <header class="app-header">
+        <h1 class="main-title font-inter">Quantity Measurement</h1>
     </header>
-    <div class="conversion-container">
-        <div class="type-container">
-            <span class="text-body inter-body">CHOOSE TYPE</span>
-            <div class="card-container">
-                <div class="card">
-                    <div class="svg-container">
-                        <div>📏</div>
-                    </div>
-                    <div class="text-body inter-body card-descriptor">Length</div>
+
+    <div class="main-wrapper">
+        <div class="category-section">
+            <span class="label-text font-inter">CHOOSE TYPE</span>
+            <div class="grid-layout">
+                <div class="unit-box">
+                    <div class="icon-wrapper"><div>📏</div></div>
+                    <div class="label-text font-inter box-label">Length</div>
                 </div>
-                <div class="card">
-                    <div class="svg-container">
-                        <div>⚖️</div>
-                    </div>
-                    <div class="text-body inter-body card-descriptor">Weight</div>
+                <div class="unit-box">
+                    <div class="icon-wrapper"><div>⚖️</div></div>
+                    <div class="label-text font-inter box-label">Weight</div>
                 </div>
-                <div class="card">
-                    <div class="svg-container">
-                        <div>🌡️</div>
-                    </div>
-                    <div class="text-body inter-body card-descriptor">Temperature</div>
+                <div class="unit-box">
+                    <div class="icon-wrapper"><div>🌡️</div></div>
+                    <div class="label-text font-inter box-label">Temperature</div>
                 </div>
-                <div class="card">
-                    <div class="svg-container">
-                        <div>🫙</div>
-                    </div>
-                    <div class="text-body inter-body card-descriptor">Volume</div>
+                <div class="unit-box">
+                    <div class="icon-wrapper"><div>🫙</div></div>
+                    <div class="label-text font-inter box-label">Volume</div>
                 </div>
             </div>
         </div>
-        <div class="action-container">
-            <span class="text-body inter-body">CHOOSE ACTION</span>
-            <div class="action-type-container">
-                <button class="action-button">Comparision</button>
-                <button class="action-button">Conversion</button>
-                <button class="action-button">Arithmetic</button>
+
+        <div class="mode-section">
+            <span class="label-text font-inter">CHOOSE ACTION</span>
+            <div class="button-group">
+                <button class="mode-btn">Comparison</button>
+                <button class="mode-btn">Conversion</button>
+                <button class="mode-btn">Arithmetic</button>
             </div>
-            <div class="converter">
-                <div class="table-header">
-                    <span class="text-body inter-body">FROM</span>
-                    <span class="text-body inter-body">TO</span>
+            
+            <div class="converter-panel">
+                <div class="panel-header">
+                    <span class="label-text font-inter">FROM</span>
+                    <span class="label-text font-inter">TO</span>
                 </div>
-                <div class="table-body">
-                    <div class="input-container">
-                        <input class="input-field inter-body" type="text" placeholder="0">
-                        <div class="input-unit-dropdown">
-                            <select class="unit-dropdown inter-body">
+                <div class="panel-body">
+                    <div class="input-block">
+                        <input class="value-input font-inter" type="number" placeholder="0">
+                        <div class="select-wrapper">
+                            <select class="unit-select font-inter">
                                 <option value="meter">Meter</option>
                                 <option value="kilometer">Kilometer</option>
                                 <option value="centimeter">Centimeter</option>
                                 <option value="millimeter">Millimeter</option>
-                                <option value="mile">Mile</option>
-                                <option value="yard">Yard</option>
-                                <option value="feet">Feet</option>
-                                <option value="inch">Inch</option>
                             </select>
                         </div>
-
                     </div>
-                    <div class="input-container">
-                        <input class="input-field inter-body" type="text" placeholder="0">
-                        <div class="input-unit-dropdown">
-                            <select class="unit-dropdown inter-body">
+                    <div class="input-block">
+                        <input class="value-input font-inter" type="number" placeholder="0" readonly>
+                        <div class="select-wrapper">
+                            <select class="unit-select font-inter">
                                 <option value="meter">Meter</option>
                                 <option value="kilometer">Kilometer</option>
                                 <option value="centimeter">Centimeter</option>
                                 <option value="millimeter">Millimeter</option>
-                                <option value="mile">Mile</option>
-                                <option value="yard">Yard</option>
-                                <option value="feet">Feet</option>
-                                <option value="inch">Inch</option>
                             </select>
                         </div>
                     </div>

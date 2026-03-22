@@ -1,0 +1,25 @@
+{
+  "units": [
+    { "id": 1, "type": "length", "label": "Meter", "symbol": "m" },
+    { "id": 2, "type": "weight", "label": "Kilogram", "symbol": "kg" },
+    { "id": 3, "type": "temperature", "label": "Celsius", "symbol": "°C" },
+    { "id": 4, "type": "volume", "label": "Litre", "symbol": "L" }
+  ],
+  "conversions": [
+    {
+      "id": 1,
+      "from": "km",
+      "to": "m",
+      "factor": 1000,
+      "formula": null
+    },
+    {
+      "id": 2,
+      "from": "C",
+      "to": "F",
+      "factor": null,
+      "formula": "(x*9/5)+32"
+    }
+  ],
+  "history": []
+}
